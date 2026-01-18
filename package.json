@@ -9,9 +9,26 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.8",
+    "@distube/ytdl-core": "^4.16.12",
+    "@elevenlabs/elevenlabs-js": "^2.31.0",
+    "clsx": "^2.1.1",
+    "duck-duck-scrape": "^2.2.7",
+    "html-to-image": "^1.11.13",
+    "html2pdf.js": "^0.14.0",
+    "jspdf": "^4.0.0",
+    "lucide-react": "^0.562.0",
     "next": "16.1.2",
+    "openai": "^6.16.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "react-player": "^3.4.0",
+    "reactflow": "^11.11.4",
+    "recharts": "^3.6.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.4.0",
+    "youtube-dl-exec": "^3.0.29"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
