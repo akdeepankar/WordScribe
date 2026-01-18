@@ -338,8 +338,8 @@ export default function Home() {
             onClick={() => { setProcessedItems([]); setActiveItemId(null); setUrl(""); setTableItems([]); setTableColumns([]); }}
             className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20">
-              <Sparkles className="h-6 w-6 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl">
+              <img src="https://cdn-icons-png.freepik.com/256/5783/5783868.png?semt=ais_white_label" alt="Logo" className="h-6 w-6 object-contain" style={{ transform: "scaleX(-1)" }} />
             </div>
             <span className="text-xl font-bold tracking-tight text-white hidden sm:block">Streamline</span>
           </div>
