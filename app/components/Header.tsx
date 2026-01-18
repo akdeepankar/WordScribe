@@ -8,7 +8,7 @@ export default function Header() {
             </div>
             <div className="space-y-2">
                 <h1 className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent dark:from-white dark:to-gray-400 sm:text-5xl">
-                    Streamline
+                    WordScribe
                 </h1>
                 <p className="max-w-[40ch] text-lg text-gray-500 dark:text-gray-400">
                     Auto-generate YouTube chapters from any video using AI

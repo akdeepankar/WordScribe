@@ -341,7 +341,7 @@ export default function Home() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl">
               <img src="https://cdn-icons-png.freepik.com/256/5783/5783868.png?semt=ais_white_label" alt="Logo" className="h-6 w-6 object-contain" style={{ transform: "scaleX(-1)" }} />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white hidden sm:block">Streamline</span>
+            <span className="text-xl font-bold tracking-tight text-white hidden sm:block">WordScribe</span>
           </div>
 
           {/* Top Bar Input Area (Visible when NOT idle) */}
@@ -501,7 +501,7 @@ export default function Home() {
           )}>
             <div className="text-center mb-10 space-y-4">
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
-                Streamline
+                WordScribe
               </h1>
               <p className="text-gray-400 text-lg md:text-xl max-w-md mx-auto">
                 Advanced YouTube intelligence powered by ElevenLabs Scribe v2.

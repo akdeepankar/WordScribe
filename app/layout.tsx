@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Streamline - Video to Knowledge",
+  title: "WordScribe - Video to Knowledge",
   description: "Transform video content into actionable knowledge with AI.",
 };
 

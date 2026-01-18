@@ -19,7 +19,7 @@ export default function DashboardLayout({ children, history = [], onHistorySelec
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl">
                         <img src="https://cdn-icons-png.freepik.com/256/5783/5783868.png?semt=ais_white_label" alt="Logo" className="h-6 w-6 object-contain" style={{ transform: "scaleX(-1)" }} />
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-white">Streamline</span>
+                    <span className="text-xl font-bold tracking-tight text-white">WordScribe</span>
                 </div>
 
                 {/* Nav Items */}
