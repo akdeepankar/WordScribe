@@ -1,37 +1,55 @@
-import ytdl from "@distube/ytdl-core";
+import { spawn } from "child_process";
+import path from "path";
 
-const AGENT = {
-    headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Cookie": "PREF=f2=8000000",
-    }
-};
+const YTDLP_PATH = path.join(process.cwd(), "yt-dlp");
 
 export async function getVideoInfo(url: string) {
-    try {
-        const info = await ytdl.getInfo(url, { requestOptions: AGENT });
-        // Find best thumbnail (largest width)
-        const thumbnail = info.videoDetails.thumbnails.sort((a, b) => b.width - a.width)[0]?.url || "";
+    return new Promise((resolve, reject) => {
+        const process = spawn(YTDLP_PATH, [
+            "--dump-single-json",
+            "--no-warnings",
+            "--prefer-free-formats",
+            "--youtube-skip-dash-manifest",
+            url
+        ]);
 
-        return {
-            title: info.videoDetails.title,
-            thumbnail: thumbnail,
-            duration: info.videoDetails.lengthSeconds,
-            videoId: info.videoDetails.videoId,
-        };
-    } catch (e: any) {
-        throw new Error(`Failed to fetch video metadata: ${e.message}`);
-    }
+        let stdout = "";
+        let stderr = "";
+
+        process.stdout.on("data", (data) => stdout += data.toString());
+        process.stderr.on("data", (data) => stderr += data.toString());
+
+        process.on("close", (code) => {
+            if (code !== 0) {
+                console.error("yt-dlp error:", stderr);
+                return reject(new Error("Failed to fetch video metadata: " + stderr));
+            }
+            try {
+                const info = JSON.parse(stdout);
+                resolve({
+                    title: info.title,
+                    thumbnail: info.thumbnail,
+                    duration: info.duration,
+                    videoId: info.id,
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
 }
 
-export async function getAudioStream(url: string) {
-    // High quality audio, prevent ended stream
-    return ytdl(url, {
-        filter: 'audioonly',
-        quality: 'highestaudio',
-        dlChunkSize: 0, // Disable chunking for reliable stream in serverless
-        requestOptions: AGENT
-    });
+export function getAudioStream(url: string) {
+    const process = spawn(YTDLP_PATH, [
+        "-o", "-",
+        "-f", "bestaudio",
+        "--no-warnings",
+        url
+    ]);
+
+    if (process.stderr) {
+        process.stderr.on('data', (data) => console.log('yt-dlp stderr:', data.toString()));
+    }
+
+    return process.stdout;
 }
