@@ -17,10 +17,12 @@ async function streamToBuffer(stream: any): Promise<Buffer> {
 
 export async function POST(req: Request) {
     try {
-        const { url, keyTerms, apiKey, entityTypes } = await req.json();
+        const { url, keyTerms, entityTypes, apiKey: clientApiKey } = await req.json();
+
+        const apiKey = clientApiKey || process.env.ELEVENLABS_API_KEY;
 
         if (!apiKey) {
-            return NextResponse.json({ error: "Missing ElevenLabs API Key" }, { status: 400 });
+            return NextResponse.json({ error: "Missing ElevenLabs API Key configuration (Settings or Server)" }, { status: 500 });
         }
 
         const client = new ElevenLabsClient({ apiKey });

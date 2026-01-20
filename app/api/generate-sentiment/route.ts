@@ -16,13 +16,19 @@ export async function POST(req: Request) {
 You are an expert sentiment analyst. 
 Analyze the emotional arc of the provided transcript over time.
 Break the content into 10-20 key segments based on the narrative flow.
-For each segment, provide:
-- timestamp: string (approximate start time in MM:SS format, assuming the transcript starts at 00:00 and flows linearly. Estimate based on word count: approx 150 words per minute).
-- score: number (from -10 (Extremely Negative) to 10 (Extremely Positive)).
-- mood: string (a 1-2 word adjective description, e.g., "Tense", "Joyful", "Neutral").
-- snippet: string (a short 5-10 word quote from that segment).
 
-Return the data as a JSON object with a key "timeline" containing the array of segments.
+For each segment in the "timeline" array, provide:
+- timestamp: string (approximate start time in MM:SS format).
+- score: number (-10 to 10).
+- mood: string (1-2 word adjective).
+- snippet: string (short quote).
+
+Also provide a high-level "analysis" object containing:
+- summary: string (a concise paragraph describing the overall emotional journey).
+- dominant_mood: string (the single most prevailing mood).
+- peaks: array of objects { "timestamp": string, "score": number, "reason": string } identifying the 3-5 most significant emotional highs or lows.
+
+Return the data as a JSON object with keys "timeline" and "analysis".
 `;
 
         const completion = await client.chat.completions.create({

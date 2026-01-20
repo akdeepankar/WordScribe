@@ -29,6 +29,10 @@ export interface ProcessedItem {
     sponsors: any[];
     qa: any[];
     debugData?: any;
+    // New Metadata
+    words?: any[];
+    language_code?: string;
+    language_probability?: number;
   };
 }
 
@@ -221,7 +225,10 @@ export default function Home() {
           highlights: resultData.highlights || [],
           sponsors: resultData.sponsors || [],
           qa: resultData.qa || [],
-          debugData: resultData
+          debugData: resultData,
+          words: resultData.words || [],
+          language_code: resultData.language_code,
+          language_probability: resultData.language_probability
         };
 
         // Complete
@@ -291,7 +298,10 @@ export default function Home() {
         entities: item.entities,
         highlights: item.highlights,
         sponsors: item.sponsors,
-        qa: item.qa
+        qa: item.qa,
+        words: item.words,
+        language_code: item.language_code,
+        language_probability: item.language_probability
       }
     };
     setProcessedItems([restoredItem]);
@@ -459,7 +469,7 @@ export default function Home() {
 
       {/* Batch Input Modal (Existing) */}
       {showBatchModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
           <div className="w-full max-w-2xl bg-zinc-900 rounded-2xl border border-white/10 p-6 shadow-2xl space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold flex items-center gap-2">
@@ -503,8 +513,11 @@ export default function Home() {
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
                 WordScribe
               </h1>
-              <p className="text-gray-400 text-lg md:text-xl max-w-md mx-auto">
-                Advanced YouTube intelligence powered by ElevenLabs Scribe v2.
+              <p className="text-xl md:text-2xl font-medium text-blue-400/90 tracking-tight">
+                Extract Knowledge. Not Just Transcripts.
+              </p>
+              <p className="text-gray-500 text-sm md:text-base max-w-md mx-auto">
+                Advanced Audio and YouTube intelligence powered by ElevenLabs Scribe v2.
               </p>
             </div>
 
@@ -615,6 +628,11 @@ export default function Home() {
                         showResultsPanel={showResultsPanel}
                         setShowResultsPanel={setShowResultsPanel}
 
+                        // Metadata Props
+                        words={activeItem.data.words}
+                        languageCode={activeItem.data.language_code}
+                        languageProbability={activeItem.data.language_probability}
+
                         // Right Panel Props
                         activeRightPanel={activeRightPanel}
                         setActiveRightPanel={setActiveRightPanel}
@@ -666,10 +684,10 @@ export default function Home() {
       {showBookmarksPanel && (
         <>
           <div
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 animate-in fade-in"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[9998] animate-in fade-in"
             onClick={() => setShowBookmarksPanel(false)}
           />
-          <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-zinc-900 border-l border-white/10 p-6 z-50 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+          <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-zinc-900 border-l border-white/10 p-6 z-[9999] shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/10 rounded-lg">

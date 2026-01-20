@@ -12,6 +12,9 @@ export interface HistoryItem {
     highlights: any[];
     sponsors: any[];
     qa: any[];
+    words?: any[];
+    language_code?: string;
+    language_probability?: number;
 }
 
 export function useHistory() {

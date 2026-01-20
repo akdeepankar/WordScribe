@@ -61,7 +61,7 @@ export default function KeyTermsDialog({
     const isAll = entityTypes.includes("all");
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div
                 ref={dialogRef}
                 className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden"

@@ -35,7 +35,7 @@ export default function SettingsDialog({ isOpen, onClose, onSave, openAIKey, onS
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
                 <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-white flex items-center gap-2">

@@ -1,5 +1,5 @@
 
-import { Copy, Check, Clock, FileText, User, Sparkles, DollarSign, HelpCircle, Search, Download, FileJson, Table, Plus, X, Trash2, Bot, Loader2, PanelRightOpen, PanelRightClose, PlusCircle, ArrowDownToLine, MoreHorizontal, Maximize2, Edit2, PenLine, Save, FileAudio, ChevronUp, ChevronDown, GraduationCap, BookOpen, Bookmark, BrainCircuit, RefreshCw, Share2, Activity, Puzzle, MessageSquare } from "lucide-react";
+import { Copy, Check, Clock, FileText, User, Sparkles, DollarSign, HelpCircle, Search, Download, FileJson, Table, Plus, X, Trash2, Bot, Loader2, PanelRightOpen, PanelRightClose, PlusCircle, ArrowDownToLine, MoreHorizontal, Maximize2, Edit2, PenLine, Save, FileAudio, ChevronUp, ChevronDown, GraduationCap, BookOpen, Bookmark, BrainCircuit, RefreshCw, Share2, Activity, Puzzle, MessageSquare, Shield, ShieldCheck } from "lucide-react";
 import NotesPanel from "./NotesPanel";
 import ChatPanel from "./ChatPanel";
 import { downloadFile, generateShowNotes, getYouTubeId, cleanEntityText } from "../lib/utils";
@@ -49,6 +49,9 @@ interface ResultsSectionProps {
     sponsors: SponsorSegment[];
     qa: QAPair[];
     debugData?: any;
+    words?: any[];
+    languageCode?: string;
+    languageProbability?: number;
     onSeek?: (time: number) => void;
     openAIKey: string;
     elevenLabsKey: string;
@@ -86,6 +89,9 @@ export default function ResultsSection({
     sponsors,
     qa,
     debugData,
+    words,
+    languageCode,
+    languageProbability,
     onSeek,
     openAIKey,
     elevenLabsKey,
@@ -113,6 +119,7 @@ export default function ResultsSection({
     const isYoutube = videoUrl?.toLowerCase().includes("youtube") || videoUrl?.includes("youtu.be");
     // Education Mode State
     const [isEducationMode, setIsEducationMode] = useState(false);
+    const [isSafeMode, setIsSafeMode] = useState(true);
     const [seekToTime, setSeekToTime] = useState<number | null>(null);
     const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
     const [newColumnName, setNewColumnName] = useState("");
@@ -333,8 +340,39 @@ export default function ResultsSection({
     };
 
     // Global Auto Import Logic
+    const SENSITIVE_TYPES_IMPORT = [
+        "credit_card", "credit_card_number", "card_number",
+        "dob", "date_of_birth", "birth_date",
+        "phone_number", "phone",
+        "ssn", "social_security_number",
+        "passport_number", "passport",
+        "email", "email_address",
+        "address", "location_address"
+    ];
+
     const handleAutoImport = () => {
         if (columns.length === 0) return;
+
+        // Helper: Normalize text (words to digits, dash to hyphen)
+        const normalizeText = (text: string) => {
+            let str = text;
+
+            // 1. Convert "dash" to "-"
+            str = str.replace(/\bdash\b/gi, "-");
+            str = str.replace(/\s*-\s*/g, "-"); // Collapse spaces around hyphens
+
+            // 2. Convert number words to digits
+            const numMap: { [key: string]: string } = {
+                'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+                'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
+            };
+            Object.keys(numMap).forEach(key => {
+                const regex = new RegExp(`\\b${key}\\b`, 'gi');
+                str = str.replace(regex, numMap[key]);
+            });
+
+            return str.trim();
+        };
 
         let newItems: TableItem[] = [...tableItems];
         const norm = (s: string) => s.toLowerCase().replace(/_/g, ' ').replace(/\s+/g, '').trim();
@@ -378,11 +416,16 @@ export default function ResultsSection({
                 let uniqueValues: { text: string, timestamp: string }[] = [];
 
                 // Map to cleaned values first
-                const tempValues = matchingEntities.map(e => ({
-                    original: e.text,
-                    cleaned: cleanEntityText(e.text),
-                    timestamp: e.formattedTimestamp
-                }));
+                // Map to cleaned and normalized values first
+                const tempValues = matchingEntities.map(e => {
+                    const isSensitive = SENSITIVE_TYPES_IMPORT.includes(e.entity_type?.toLowerCase());
+                    const shouldRedact = isSafeMode && isSensitive;
+                    return {
+                        original: e.text,
+                        cleaned: shouldRedact ? "********" : normalizeText(cleanEntityText(e.text)),
+                        timestamp: e.formattedTimestamp
+                    };
+                });
 
                 // Deduplicate by cleaned text (keep first occurrence)
                 const seen = new Set();
@@ -484,8 +527,8 @@ export default function ResultsSection({
             { id: "course", label: "Course", icon: BookOpen },
             { id: "quiz", label: "Quiz", icon: Puzzle }
         ] : []),
-        { id: "entities", label: "Entities", icon: User },
         { id: "transcript", label: "Transcript", icon: FileText },
+        { id: "entities", label: "Entities", icon: User },
         { id: "summary", label: "Summary", icon: Sparkles },
         { id: "sentiment", label: "Sentiment", icon: Activity },
     ];
@@ -639,6 +682,19 @@ export default function ResultsSection({
                         Education
                     </button>
                     <button
+                        onClick={() => setIsSafeMode(!isSafeMode)}
+                        className={cn(
+                            "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                            isSafeMode
+                                ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800"
+                                : "bg-white/5 text-gray-300 border-white/10 hover:bg-white/10"
+                        )}
+                        title="Toggle Safe Mode (Hides PII)"
+                    >
+                        {isSafeMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                        Safe Mode
+                    </button>
+                    <button
                         onClick={() => {
                             if (showResultsPanel && !activeRightPanel) return;
                             setShowResultsPanel(!showResultsPanel);
@@ -716,7 +772,7 @@ export default function ResultsSection({
                 {/* Left Panel */}
                 {showResultsPanel && (
                     <div className={cn(
-                        "rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-white/5 transition-all duration-500 flex flex-col sticky top-24 h-[calc(100vh-140px)] overflow-hidden",
+                        "rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-white/5 transition-all duration-500 flex flex-col sticky top-24 h-[calc(100vh-200px)] overflow-hidden",
                         activeRightPanel ? "w-1/2" : "w-full"
                     )}>
                         <div className="border-b border-gray-200 px-2 dark:border-white/10 overflow-x-auto">
@@ -753,7 +809,13 @@ export default function ResultsSection({
                         <div className="p-6 overflow-y-auto flex-1 relative">
                             {/* Persistent Source Player (Hidden when not active, but mounted) */}
                             <div className={cn("w-full h-full", activeTab === "source" ? "block" : "hidden")}>
-                                <SourceTab videoUrl={videoUrl} isYoutube={isYoutube} seekToTime={seekToTime} />
+                                <SourceTab
+                                    videoUrl={videoUrl}
+                                    isYoutube={isYoutube}
+                                    seekToTime={seekToTime}
+                                    languageCode={languageCode}
+                                    languageProbability={languageProbability}
+                                />
                             </div>
 
                             {/* Persistent Summary */}
@@ -761,13 +823,21 @@ export default function ResultsSection({
                                 <SummaryTab
                                     transcript={transcript}
                                     apiKey={openAIKey}
+                                    onSeek={handleSeek}
                                 />
                             </div>
                             {/* Persistent Transcript */}
                             <div className={cn("w-full h-full", activeTab === "transcript" ? "block" : "hidden")}>
                                 <TranscriptTab
                                     transcript={transcript}
+                                    words={words}
                                     onSeek={handleSeek}
+                                    apiKey={openAIKey}
+                                    bookmarks={bookmarks}
+                                    onToggleBookmark={toggleBookmark}
+                                    isSafeMode={isSafeMode}
+                                    onToggleSafeMode={() => setIsSafeMode(!isSafeMode)}
+                                    entities={entities}
                                 />
                             </div>
                             {/* Persistent Entities */}
@@ -782,6 +852,7 @@ export default function ResultsSection({
                                     apiKey={openAIKey}
                                     bookmarks={bookmarks}
                                     onToggleBookmark={toggleBookmark}
+                                    isSafeMode={isSafeMode}
                                 />
                             </div>
                             {/* Persistent Flashcards */}
@@ -889,7 +960,7 @@ export default function ResultsSection({
                 {/* Right Panel: Data Table or Notes */}
                 {activeRightPanel && (
                     <div className={cn(
-                        "rounded-2xl border border-white/10 bg-zinc-900 shadow-xl overflow-hidden flex flex-col sticky top-24 self-start h-[calc(100vh-140px)] animate-in slide-in-from-right-4 bg-gray-900 transition-all duration-500",
+                        "rounded-2xl border border-white/10 bg-zinc-900 shadow-xl overflow-hidden flex flex-col sticky top-24 self-start h-[calc(100vh-200px)] animate-in slide-in-from-right-4 bg-gray-900 transition-all duration-500",
                         showResultsPanel ? "w-1/2" : "w-full"
                     )}>
                         {activeRightPanel === "table" ? (
