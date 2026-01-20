@@ -8,7 +8,8 @@ import ResultsSection from "./components/ResultsSection";
 import SettingsDialog from "./components/SettingsDialog";
 import KeyTermsDialog from "./components/KeyTermsDialog";
 import FileSidebar from "./components/FileSidebar";
-import { AlertCircle, X, Sparkles, Youtube, Settings, History, Layers, Plus, Clock, Bookmark, Trash2, ArrowRight } from "lucide-react";
+import ComplianceModal from "./components/ComplianceModal";
+import { AlertCircle, X, Sparkles, Youtube, Settings, History, Layers, Plus, Clock, Bookmark, Trash2, ArrowRight, ClipboardCheck } from "lucide-react";
 import { useHistory, HistoryItem } from "./hooks/useHistory";
 import { cn } from "./lib/utils";
 
@@ -86,6 +87,11 @@ export default function Home() {
   // Settings State
   const [showSettings, setShowSettings] = useState(false);
   const [showKeyTerms, setShowKeyTerms] = useState(false);
+
+  // Compliance State
+  const [showComplianceModal, setShowComplianceModal] = useState(false);
+  const [complianceItems, setComplianceItems] = useState<string[]>([]);
+
 
   // Right Panel State
   const [activeRightPanel, setActiveRightPanel] = useState<"table" | "notes" | "chat" | null>(null);
@@ -341,6 +347,14 @@ export default function Home() {
         setEntityTypes={setEntityTypes}
       />
 
+      <ComplianceModal
+        isOpen={showComplianceModal}
+        onClose={() => setShowComplianceModal(false)}
+        items={complianceItems}
+        onSave={setComplianceItems}
+      />
+
+
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-40 flex h-20 items-center justify-between px-6 md:px-12 backdrop-blur-sm transition-all duration-500">
         <div className="flex items-center gap-6 flex-1">
@@ -392,6 +406,9 @@ export default function Home() {
                     onGenerate={handleSingleGenerate}
                     isLoading={isProcessingAny}
                     onKeyTermsClick={() => setShowKeyTerms(true)}
+                    onComplianceClick={() => setShowComplianceModal(true)}
+                    hasKeyTerms={!!keyTerms}
+                    hasComplianceItems={complianceItems.length > 0}
                     variant="compact"
                   />
                 </div>
@@ -548,13 +565,33 @@ export default function Home() {
                     <span className="font-medium">Open Batch Input Modal</span>
                   </button>
 
-                  <button
-                    onClick={() => setShowKeyTerms(true)}
-                    className="w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors text-sm"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Entity Types & Config
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowKeyTerms(true)}
+                      className={cn(
+                        "flex-1 h-12 flex items-center justify-center gap-2 rounded-xl border transition-colors text-sm",
+                        keyTerms
+                          ? "border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                          : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                      )}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Config
+                    </button>
+
+                    <button
+                      onClick={() => setShowComplianceModal(true)}
+                      className={cn(
+                        "flex-1 h-12 flex items-center justify-center gap-2 rounded-xl border transition-colors text-sm",
+                        complianceItems.length > 0
+                          ? "border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                          : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                      )}
+                    >
+                      <ClipboardCheck className="h-4 w-4" />
+                      Compliance
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <InputSection
@@ -563,6 +600,9 @@ export default function Home() {
                   onGenerate={handleSingleGenerate}
                   isLoading={isProcessingAny}
                   onKeyTermsClick={() => setShowKeyTerms(true)}
+                  onComplianceClick={() => setShowComplianceModal(true)}
+                  hasKeyTerms={!!keyTerms}
+                  hasComplianceItems={complianceItems.length > 0}
                   variant="hero"
                 />
               )}
@@ -658,6 +698,7 @@ export default function Home() {
                         onEducationModeToggle={(enabled) => {
                           if (enabled) setIsSidebarCollapsed(true);
                         }}
+                        complianceItems={complianceItems}
                       />
                     </>
                   )}

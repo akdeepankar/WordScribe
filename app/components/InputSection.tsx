@@ -1,4 +1,4 @@
-import { Play, Sparkles, Tag } from "lucide-react";
+import { Play, Sparkles, Tag, ClipboardCheck } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface InputSectionProps {
@@ -7,6 +7,9 @@ interface InputSectionProps {
     onGenerate: () => void;
     isLoading: boolean;
     onKeyTermsClick: () => void;
+    onComplianceClick?: () => void;
+    hasKeyTerms?: boolean;
+    hasComplianceItems?: boolean;
     variant?: "hero" | "compact";
 }
 
@@ -16,6 +19,9 @@ export default function InputSection({
     onGenerate,
     isLoading,
     onKeyTermsClick,
+    onComplianceClick,
+    hasKeyTerms = false,
+    hasComplianceItems = false,
     variant = "hero",
 }: InputSectionProps) {
     if (variant === "compact") {
@@ -34,11 +40,31 @@ export default function InputSection({
 
                 <button
                     onClick={onKeyTermsClick}
-                    className="h-10 w-10 flex items-center justify-center rounded-lg border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    className={cn(
+                        "h-10 w-10 flex items-center justify-center rounded-lg border transition-colors",
+                        hasKeyTerms
+                            ? "border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                            : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                    )}
                     title="Edit Key Terms"
                 >
                     <Tag className="h-4 w-4" />
                 </button>
+
+                {onComplianceClick && (
+                    <button
+                        onClick={onComplianceClick}
+                        className={cn(
+                            "h-10 w-10 flex items-center justify-center rounded-lg border transition-colors",
+                            hasComplianceItems
+                                ? "border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                                : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                        )}
+                        title="Compliance Checklist"
+                    >
+                        <ClipboardCheck className="h-4 w-4" />
+                    </button>
+                )}
 
                 <button
                     onClick={onGenerate}
@@ -67,11 +93,30 @@ export default function InputSection({
             <div className="flex gap-2">
                 <button
                     onClick={onKeyTermsClick}
-                    className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors text-sm"
+                    className={cn(
+                        "flex-1 h-12 flex items-center justify-center gap-2 rounded-xl border transition-colors text-sm",
+                        hasKeyTerms
+                            ? "border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                            : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                    )}
                 >
                     <Sparkles className="h-4 w-4" />
-                    Entity Types & Config
+                    Config
                 </button>
+                {onComplianceClick && (
+                    <button
+                        onClick={onComplianceClick}
+                        className={cn(
+                            "flex-1 h-12 flex items-center justify-center gap-2 rounded-xl border transition-colors text-sm",
+                            hasComplianceItems
+                                ? "border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                                : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                        )}
+                    >
+                        <ClipboardCheck className="h-4 w-4" />
+                        Compliance
+                    </button>
+                )}
             </div>
 
             <button

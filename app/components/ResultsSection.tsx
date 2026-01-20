@@ -1,5 +1,4 @@
-
-import { Copy, Check, Clock, FileText, User, Sparkles, DollarSign, HelpCircle, Search, Download, FileJson, Table, Plus, X, Trash2, Bot, Loader2, PanelRightOpen, PanelRightClose, PlusCircle, ArrowDownToLine, MoreHorizontal, Maximize2, Edit2, PenLine, Save, FileAudio, ChevronUp, ChevronDown, GraduationCap, BookOpen, Bookmark, BrainCircuit, RefreshCw, Share2, Activity, Puzzle, MessageSquare, Shield, ShieldCheck } from "lucide-react";
+import { Copy, Check, Clock, FileText, User, Sparkles, DollarSign, HelpCircle, Search, Download, FileJson, Table, Plus, X, Trash2, Bot, Loader2, PanelRightOpen, PanelRightClose, PlusCircle, ArrowDownToLine, MoreHorizontal, Maximize2, Edit2, PenLine, Save, FileAudio, ChevronUp, ChevronDown, GraduationCap, BookOpen, Bookmark, BrainCircuit, RefreshCw, Share2, Activity, Puzzle, MessageSquare, Shield, ShieldCheck, ClipboardCheck } from "lucide-react";
 import NotesPanel from "./NotesPanel";
 import ChatPanel from "./ChatPanel";
 import { downloadFile, generateShowNotes, getYouTubeId, cleanEntityText } from "../lib/utils";
@@ -15,6 +14,7 @@ import MindMapTab from "./tabs/MindMapTab";
 import SentimentTab from "./tabs/SentimentTab";
 import QuizTab from "./tabs/QuizTab";
 import CourseTab, { CourseData } from "./tabs/CourseTab";
+import ComplianceTab from "./tabs/ComplianceTab";
 import { useState, useEffect, useMemo } from "react";
 
 interface Chapter {
@@ -75,6 +75,7 @@ interface ResultsSectionProps {
     bookmarks: BookmarkItem[];
     onToggleBookmark: (item: BookmarkItem) => void;
     onEducationModeToggle?: (enabled: boolean) => void;
+    complianceItems?: string[];
 }
 
 
@@ -111,7 +112,8 @@ export default function ResultsSection({
     allProcessedItems,
     bookmarks,
     onToggleBookmark,
-    onEducationModeToggle
+    onEducationModeToggle,
+    complianceItems
 }: ResultsSectionProps) {
     const [activeTab, setActiveTab] = useState<string>("source");
     const [copied, setCopied] = useState(false);
@@ -139,6 +141,9 @@ export default function ResultsSection({
     const [targetColumn, setTargetColumn] = useState("");
     const [refinedValue, setRefinedValue] = useState("");
     const [targetRowId, setTargetRowId] = useState("new");
+
+    // Compliance State (Lifted for UI)
+    const [complianceStats, setComplianceStats] = useState<{ passed: number, total: number } | null>(null);
 
     const toggleBookmark = onToggleBookmark;
 
@@ -521,20 +526,32 @@ export default function ResultsSection({
         return suggestions.slice(0, 5); // Limit to 5 suggestions
     }, [entities, columns]);
 
-    const tabs = [
-        { id: "source", label: "Source", icon: FileAudio },
-        ...(isEducationMode ? [
-            { id: "chapters", label: "Chapters", icon: Clock },
-            { id: "flashcards", label: "Flashcards", icon: BrainCircuit },
-            { id: "mindmap", label: "Mindmap", icon: Share2 },
-            { id: "course", label: "Course", icon: BookOpen },
-            { id: "quiz", label: "Quiz", icon: Puzzle }
-        ] : []),
-        { id: "transcript", label: "Transcript", icon: FileText },
-        { id: "entities", label: "Entities", icon: User },
-        { id: "summary", label: "Summary", icon: Sparkles },
-        { id: "sentiment", label: "Sentiment", icon: Activity },
-    ];
+    const tabs = useMemo(() => {
+        const t: any[] = [
+            { id: "source", label: "Source", icon: FileAudio },
+            ...(isEducationMode ? [
+                { id: "chapters", label: "Chapters", icon: Clock },
+                { id: "flashcards", label: "Flashcards", icon: BrainCircuit },
+                { id: "mindmap", label: "Mindmap", icon: Share2 },
+                { id: "course", label: "Course", icon: BookOpen },
+                { id: "quiz", label: "Quiz", icon: Puzzle }
+            ] : []),
+            { id: "transcript", label: "Transcript", icon: FileText },
+            { id: "entities", label: "Entities", icon: User },
+            { id: "summary", label: "Summary", icon: Sparkles },
+            { id: "sentiment", label: "Sentiment", icon: Activity },
+        ];
+
+        if (complianceItems && complianceItems.length > 0) {
+            t.push({
+                id: "compliance",
+                label: `Compliance${complianceStats ? ` (${complianceStats.passed}/${complianceStats.total})` : ''}`,
+                icon: ClipboardCheck,
+                color: complianceStats ? (complianceStats.passed === complianceStats.total ? "text-green-500" : "text-amber-500") : undefined
+            });
+        }
+        return t;
+    }, [isEducationMode, complianceItems, complianceStats]);
 
     // Effect: Switch away from "chapters" if Education Mode is disabled while active
     useEffect(() => {
@@ -801,8 +818,8 @@ export default function ResultsSection({
                                                 : `text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5 ${hoverClass}`
                                                 }`}
                                         >
-                                            <Icon className={cn("h-4 w-4", !activeTab && isEducationTab && "text-green-500/70")} />
-                                            <span>{tab.label}</span>
+                                            <Icon className={cn("h-4 w-4", !activeTab && isEducationTab && "text-green-500/70", (tab as any).color)} />
+                                            <span className={(tab as any).color}>{tab.label}</span>
                                         </button>
                                     )
                                 })}
@@ -899,6 +916,17 @@ export default function ResultsSection({
                                 <QuizTab
                                     transcript={transcript}
                                     apiKey={openAIKey}
+                                />
+                            </div>
+                            {/* Persistent Compliance */}
+                            <div className={cn("w-full h-full", activeTab === "compliance" ? "block" : "hidden")}>
+                                <ComplianceTab
+                                    transcript={transcript}
+                                    checklistItems={complianceItems || []}
+                                    apiKey={openAIKey}
+                                    isSafeMode={isSafeMode}
+                                    entities={entities}
+                                    onComplianceUpdate={(passed, total) => setComplianceStats({ passed, total })}
                                 />
                             </div>
                             {/* Tab Content */}
