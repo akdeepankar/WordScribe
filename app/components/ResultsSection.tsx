@@ -160,8 +160,11 @@ export default function ResultsSection({
 
     const handleSeek = (time: number) => {
         setSeekToTime(time);
-        // Switch to audio tab if not already there to show controls?
-        // setActiveTab("audio");
+    };
+
+    const handleSummarySeek = (time: number) => {
+        setSeekToTime(time);
+        setActiveTab("source");
     };
 
     const handleGenerateCourse = async () => {
@@ -823,7 +826,7 @@ export default function ResultsSection({
                                 <SummaryTab
                                     transcript={transcript}
                                     apiKey={openAIKey}
-                                    onSeek={handleSeek}
+                                    onSeek={handleSummarySeek}
                                 />
                             </div>
                             {/* Persistent Transcript */}
