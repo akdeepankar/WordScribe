@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error("YouTube Process Error:", error);
         return NextResponse.json(
-            { error: "Failed to process video" },
+            { error: `Failed to process video: ${(error as any).message}` },
             { status: 500 }
         );
     }

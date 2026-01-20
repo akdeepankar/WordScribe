@@ -170,7 +170,7 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error("Transcribe Error:", error);
         return NextResponse.json(
-            { error: "Internal Server Error" },
+            { error: `Transcribe Error: ${(error as any).message}` },
             { status: 500 }
         );
     }
